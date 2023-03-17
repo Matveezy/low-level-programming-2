@@ -1,7 +1,7 @@
 #ifndef LOW_LEVEL_PROGRAMMING_2_CONSTANT_H
 #define LOW_LEVEL_PROGRAMMING_2_CONSTANT_H
 
-#include "struct.h"
+#include "../struct/struct.h"
 #include "mm_malloc.h"
 
 struct constant *create_int_constant(int value);

@@ -1,9 +1,8 @@
-#include <stdio.h>
 #include "lexer.h"
 #include "parser.h"
 
 int main(void) {
-//    yydebug = 1;
+    yyset_debug(1);
     while (1) {
 
         yyparse();

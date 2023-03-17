@@ -2,7 +2,7 @@
 #define LOW_LEVEL_PROGRAMMING_2_AST_H
 
 #include "stdio.h"
-#include "struct.h"
+#include "../struct/struct.h"
 
 typedef struct ast_node ast_node;
 typedef struct condition_node condition_node;

@@ -1,7 +1,7 @@
 %code requires {
-#include "../constant.h"
-#include "../struct.h"
-#include "../ast.h"
+#include "../constant/constant.h"
+#include "../struct/struct.h"
+#include "../ast/ast.h"
 #include <stdio.h>
 #include <string.h>
 extern int yylex();
@@ -68,6 +68,8 @@ subqueries: subqueries subquery {;}
            | subquery {;}
 
 subquery: filter {;}
+        |
+        map
 
 filter: TOKFILTER conditions {print_condition_union($2);}
 
@@ -88,15 +90,15 @@ condition:
           constant CONSTOP constant {$$ = create_condition_node($1, $3, $2); printf("condition\n");}
 
 map:
-    OBRACE map_entries EBRACE {"printf("map");"}
+    OBRACE map_entries EBRACE {printf("map");}
 
 map_entries:
         map_entry
         |
-        map_entry COMMA map_entries
+        map_entry COMMA map_entries {$$ = push_back_to_map($3, $1);}
 
 map_entry:
-          TOKSTRING COLON constant {printf("map_entry create");}
+          TOKSTRING COLON constant {$$ = create_map($1,$3);}
 
 constant:
         id

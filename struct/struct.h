@@ -1,7 +1,9 @@
 #ifndef LOW_LEVEL_PROGRAMMING_2_STRUCT_H
 #define LOW_LEVEL_PROGRAMMING_2_STRUCT_H
+
 #include "stdbool.h"
 #include "mm_malloc.h"
+
 typedef enum predicate_type predicate_type;
 
 #define operation(x) _Generic(x, \
@@ -52,22 +54,13 @@ enum AST_NODE_TYPE {
 };
 
 struct map_entry {
-    char *alias;
-    char *attrname;
-    union {
-        bool predicate;
-        char *char_predicate;
-    };
+    char *key;
+    struct constant *constant;
+    struct map_entry *next;
+    struct map_entry *prev;
 };
 
-enum PREDICATE_TYPE {
-    BOOL_TYPE,
-    STRING_TYPE
-};
-
-struct map_entry *create_map_entry_bool(char *alias, char *attrname, bool predicate);
-
-struct map_entry *create_map_entry_char(char *alias, char *attrname, char *predicate);
-
+struct map_entry *create_map(char *, struct constant *);
+struct map_entry *push_back_to_map(struct map_entry *, struct map_entry *);
 #define create_map_entry(alias, attrname, predicate) _Generic(predicate, bool: create_map_entry_bool, char*: create_map_entry_char)(alias, attrname, predicate)
 #endif //LOW_LEVEL_PROGRAMMING_2_STRUCT_H

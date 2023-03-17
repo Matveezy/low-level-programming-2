@@ -1,5 +1,5 @@
 %{
-#include "struct.h"
+#include "../struct/struct.h"
 #include <stdio.h>
 #include "parser.h"
 %}
