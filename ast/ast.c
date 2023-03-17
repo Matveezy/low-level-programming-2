@@ -61,6 +61,21 @@ condition_union *create_simple_condition_union(condition_node *cond_node) {
     return simple_cond_union;
 }
 
+return_node *create_return_node(void *value, enum return_node_type ret_node_type) {
+    return_node *ret_node = malloc(sizeof(struct return_node));
+    ret_node->node_type = AST_NODE_RETURN;
+    ret_node->ret_node_type = ret_node_type;
+    switch (ret_node_type) {
+        case RETURN_CONSTANT:
+            ret_node->constant = (struct constant *) value;
+            break;
+        case RETURN_MAP:
+            ret_node->map = (struct map_entry *) value;
+            break;
+    }
+    return ret_node;
+}
+
 void print_condition_union(condition_union *cond_union) {
     if (cond_union->union_type == SIMPLE_CONDITION) {
         print_simple_condition(cond_union);

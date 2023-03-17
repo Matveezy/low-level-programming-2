@@ -50,7 +50,8 @@ enum AST_NODE_TYPE {
     AST_NODE_UPDATE,
     AST_NODE_DELETE,
     AST_NODE_CONDITION,
-    AST_NODE_FILTER
+    AST_NODE_FILTER,
+    AST_NODE_RETURN,
 };
 
 struct map_entry {

@@ -7,6 +7,7 @@
 typedef struct ast_node ast_node;
 typedef struct condition_node condition_node;
 typedef struct condition_union condition_union;
+typedef struct return_node return_node;
 
 enum condition_type {
     NODE,
@@ -16,6 +17,18 @@ enum condition_type {
 enum condition_union_type {
     UNION_CONDITION,
     SIMPLE_CONDITION
+};
+
+enum return_node_type {
+    RETURN_CONSTANT,
+    RETURN_MAP
+};
+
+struct return_node {
+    enum AST_NODE_TYPE node_type;
+    enum return_node_type ret_node_type;
+    struct constant *constant;
+    struct map_entry *map;
 };
 
 struct condition_node {
@@ -63,5 +76,7 @@ condition_union *create_condition_union(void *, void *, enum condition_type,
 condition_union *create_simple_condition_union(condition_node *cond_node);
 
 void print_condition_union(condition_union *cond_union);
+
+return_node *create_return_node(void *, enum return_node_type);
 
 #endif //LOW_LEVEL_PROGRAMMING_2_AST_H
