@@ -34,6 +34,5 @@ IN                      return TOKIN;
 [a-zA-Z][a-zA-Z0-9.]*   {yylval.string = strdup(yytext); return ID; }
 -?[0-9]+                {yylval.int_value = atoi(yytext); return INT_TOKEN;}
 -?[0-9]+\.[0-9]+        {yylval.float_value = atof(yytext);  return FLOAT_TOKEN;}
-[ \t\n]+
-.
+[\t\n]+
 %%

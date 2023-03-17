@@ -64,18 +64,20 @@ struct return_node *return_node;
 %type <return_node> return_value return_statement
 
 %%
-query: subqueries SEMICOLON{printf("done");};
+query: for_statement SEMICOLON {printf("done");}
 
-for_statement: TOKFOR ID TOKIN subqueries {printf("for_statement\n");}
+for_statement: TOKFOR ID TOKIN ID subqueries {printf("for_statement\n");}
 
 subqueries: subqueries subquery {;}
            | subquery {;}
 
 subquery: filter {;}
         |
-        map
+        for_statement {printf("subquery\n");}
         |
-        return_statement
+        terminal_statement {printf("subquery\n");}
+
+terminal_statement: return_statement
 
 filter: TOKFILTER conditions {print_condition_union($2);}
 
