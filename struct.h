@@ -1,7 +1,7 @@
 #ifndef LOW_LEVEL_PROGRAMMING_2_STRUCT_H
 #define LOW_LEVEL_PROGRAMMING_2_STRUCT_H
 #include "stdbool.h"
-
+#include "mm_malloc.h"
 typedef enum predicate_type predicate_type;
 
 #define operation(x) _Generic(x, \

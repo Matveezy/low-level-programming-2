@@ -17,7 +17,7 @@ struct constant *create_float_constant(float value) {
 struct constant *create_bool_constant(bool value) {
     struct constant *bool_const = (struct constant *) malloc(sizeof(struct constant));
     bool_const->const_type = BOOL;
-    bool_const->float_data = value;
+    bool_const->bool_data = value;
     return bool_const;
 };
 

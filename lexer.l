@@ -4,7 +4,7 @@
 #include "parser.h"
 %}
 
-%option yylineno noyywrap
+%option yylineno noyywrap debug
 
 %%
 "true"                  {yylval.bool_value = true; return TOKBOOL;}
@@ -28,10 +28,12 @@ IN                      return TOKIN;
 \}                      return EBRACE;
 %                       return TOKPERCENT;
 ;                       return SEMICOLON;
+":"                     return COLON;
+","                     return COMMA;
 \"[^\"]*\"              {yylval.string = strdup(yytext); return TOKSTRING; }
 [a-zA-Z][a-zA-Z0-9.]*   {yylval.string = strdup(yytext); return ID; }
 -?[0-9]+                {yylval.int_value = atoi(yytext); return INT_TOKEN;}
 -?[0-9]+\.[0-9]+        {yylval.float_value = atof(yytext);  return FLOAT_TOKEN;}
-\n                      /* игнорируем символ конца строки */;
-[ \t]+                  /* игнорируем пробелы и символы табуляции */;
+[ \t\n]+
+.
 %%

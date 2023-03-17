@@ -1,5 +1,4 @@
 #include "struct.h"
-#include "mm_malloc.h"
 
 struct map_entry *create_map_entry_bool(char *alias, char *attrname, bool predicate) {
     struct map_entry *entry = malloc(sizeof(struct map_entry));

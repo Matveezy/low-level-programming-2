@@ -1,6 +1,7 @@
 %code requires {
 #include "../constant.h"
 #include "../struct.h"
+#include "../ast.h"
 #include <stdio.h>
 #include <string.h>
 extern int yylex();
@@ -28,6 +29,8 @@ struct map_entry *map;
 enum log_operation log_op;
 enum constant_operation const_op;
 struct constant *constant;
+struct condition_node *condition_node;
+struct condition_union *condition_union;
 }
 
 %token <int_value> INT_TOKEN
@@ -39,6 +42,8 @@ struct constant *constant;
 %token <string> TOKIN
 %token <string> QUOTE
 %token <string> SEMICOLON
+%token <string> COMMA
+%token <string> COLON
 %token <string> OBRACE
 %token <string> EBRACE
 %token <string> TOKFILTER
@@ -50,48 +55,53 @@ struct constant *constant;
 %token <const_op> CONSTOP
 
 
-%type <string> query subqueries subquery filters condition pattern
-%type <map> map_entry
-%type <const> value
+%type <string> query subqueries subquery
+%type <map> map_entry map_entries map
+%type <constant> value id constant
+%type <condition_node> condition
+%type <condition_union> condition_union conditions
 
 %%
-query: subqueries {printf("%s", $1);};
-
+query: subqueries{printf("done");};
 
 subqueries: subqueries subquery {;}
            | subquery {;}
 
-subquery: filters {;}
+subquery: filter {;}
 
-filters: {;}
-    | TOKFILTER condition {printf("filters1\n");}
-    | filters LOGOP conditions {printf("filters2\n");}
+filter: TOKFILTER conditions {print_condition_union($2);}
 
-conditions: {;}
-    | condition {;}
+conditions:
+           condition SEMICOLON{$$ = create_simple_condition_union($1);printf("conditions\n");}
+           |
+           condition_union
+           |
+           condition_union LOGOP condition {$$ = create_condition_union($1, $3, UNION, NODE, $2);}
+           |
+           condition LOGOP condition_union {$$ = create_condition_union($1, $3, NODE, UNION, $2);}
+           |
+           condition_union LOGOP condition_union {$$ = create_condition_union($1, $3, UNION, UNION, $2);}
+
+condition_union: condition LOGOP condition {$$ = create_condition_union($1, $3, NODE, NODE, $2); printf("condition_union");}
 
 condition:
-       map_entry {printf("map_entry is: %s\n%s\n%s\n", $1->alias, $1->attrname, $1->char_predicate);};
+          constant CONSTOP constant {$$ = create_condition_node($1, $3, $2); printf("condition\n");}
 
+map:
+    OBRACE map_entries EBRACE {"printf("map");"}
+
+map_entries:
+        map_entry
+        |
+        map_entry COMMA map_entries
 
 map_entry:
-     LOWERCASE_WORD TOKDOT LOWERCASE_WORD TOKEQUALS QUOTE LOWERCASE_WORD QUOTE {$$=create_map_entry($1,$3,$6);}
-     |
-     LOWERCASE_WORD TOKDOT LOWERCASE_WORD TOKEQUALS TOKBOOL {$$=create_map_entry($1, $3, (bool) $5);}
-     |
-     LOWERCASE_WORD TOKDOT LOWERCASE_WORD CONSTOP pattern {$$=create_map_entry($1,$3,$5);}
+          TOKSTRING COLON constant {printf("map_entry create");}
 
-const_operation:
-                LOWERCASE_WORD TOKDOT LOWERCASE_WORD LOGOP value {printf("const_operation founded");}
-
-pattern:
-     QUOTE LOWERCASE_WORD QUOTE {$$ = $2;}
-     |
-     QUOTE TOKPERCENT LOWERCASE_WORD QUOTE {$$ = $2;}
-     |
-     QUOTE TOKPERCENT LOWERCASE_WORD TOKPERCENT {$$ = $2;}
-     |
-     QUOTE LOWERCASE_WORD TOKPERCENT {$$ = $2;}
+constant:
+        id
+        |
+        value
 
 id: ID {$$ = create_string_constant($1, true);}
 
