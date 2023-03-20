@@ -8,11 +8,14 @@ typedef struct ast_node ast_node;
 typedef struct condition_node condition_node;
 typedef struct condition_union condition_union;
 typedef struct return_node return_node;
+typedef struct map_entry map_entry;
 typedef struct terminal_statement_node terminal_statement_node;
 typedef struct subquery_node subquery_node;
 typedef struct query_node query_node;
 typedef struct for_node for_node;
 typedef struct insert_node insert_node;
+typedef struct remove_node remove_node;
+typedef struct update_node update_node;
 
 enum condition_type {
     NODE,
@@ -46,13 +49,24 @@ struct return_node {
     enum AST_NODE_TYPE node_type;
     enum return_node_type ret_node_type;
     struct constant *constant;
-    struct map_entry *map;
+    map_entry *map;
 };
 
 struct for_node {
     char *alias;
     char *table_name;
     subquery_node *subquery_list;
+};
+
+struct remove_node {
+    char *table_name;
+    char *variable;
+};
+
+struct update_node {
+    char *table_name;
+    char *variable;
+    map_entry *map;
 };
 
 struct condition_node {
@@ -96,7 +110,7 @@ struct terminal_statement_node {
 
 struct insert_node {
     char *tablename;
-    struct map_entry *map;
+    map_entry *map;
 };
 
 struct ast_node {
@@ -114,14 +128,14 @@ struct ast_node {
 
 condition_node *create_condition_node(struct constant *, struct constant *, enum constant_operation);
 
-struct ast_node *add_condition_node(struct ast_node *new_node, struct ast_node *parent);
+struct ast_node *add_condition_node(struct ast_node *, struct ast_node *);
 
 condition_union *create_condition_union(void *, void *, enum condition_type,
                                         enum condition_type, enum log_operation);
 
-condition_union *create_simple_condition_union(condition_node *cond_node);
+condition_union *create_simple_condition_union(condition_node *);
 
-void print_condition_union(condition_union *cond_union);
+void print_condition_union(condition_union *);
 
 return_node *create_return_node(void *, enum return_node_type);
 
@@ -135,6 +149,10 @@ query_node *create_query_node(void *, enum query_node_type);
 
 for_node *create_for_node(char *, char *, subquery_node *);
 
-insert_node *create_insert_node(char *, struct map_entry *);
+insert_node *create_insert_node(char *, map_entry *);
+
+remove_node *create_remove_node(char *, char *);
+
+update_node *create_update_node(char *, char *, map_entry *);
 
 #endif //LOW_LEVEL_PROGRAMMING_2_AST_H

@@ -39,6 +39,8 @@ struct terminal_statement_node *term_stmt;
 struct subquery_node* subquery_node;
 struct for_node *for_node;
 struct insert_node *insert_node;
+struct remove_node *remove_node;
+struct update_node *update_node;
 }
 
 %token <int_value> INT_TOKEN
@@ -60,8 +62,11 @@ struct insert_node *insert_node;
 %token <string> TOKPERCENT
 %token <log_op> LOGOP
 %token <const_op> CONSTOP
+%token TOKWITH
 %token TOKINSERT
 %token TOKINTO
+%token TOKREMOVE
+%token TOKUPDATE
 
 
 %type <map> map_entry map_entries map
@@ -73,6 +78,8 @@ struct insert_node *insert_node;
 %type <subquery_node> subquery subqueries
 %type <for_node> for_statement
 %type <insert_node> insert_statement
+%type <remove_node> remove_statement
+%type <update_node> update_statement
 
 %%
 query: for_statement SEMICOLON {root = create_query_node((void *) $1, FOR_QUERY_STATEMENT); printf("done\n");}
@@ -90,6 +97,10 @@ subquery:
         terminal_statement {$$ = create_subquery_node((void*) $1, TERMINAL_STATEMENT); printf("subquery\n");}
 
 terminal_statement: return_statement {$$ = create_terminal_statement_node((void*) $1, AST_NODE_RETURN);}
+                    |
+                    remove_statement {$$ = create_terminal_statement_node((void*) $1, AST_NODE_REMOVE);}
+                    |
+                    update_statement {$$ = create_terminal_statement_node((void*) $1, AST_NODE_UPDATE);}
 
 filter: TOKFILTER conditions {print_condition_union($2);}
 
@@ -107,7 +118,11 @@ conditions:
 condition_union: condition LOGOP condition {$$ = create_condition_union($1, $3, NODE, NODE, $2); printf("condition_union\n");}
 
 condition:
-          constant CONSTOP constant {$$ = create_condition_node($1, $3, $2); printf("condition\n");}
+         constant CONSTOP constant {$$ = create_condition_node($1, $3, $2); printf("condition\n");}
+
+update_statement : TOKUPDATE id TOKWITH map TOKIN id {$$ = create_update_node($6->string, $2->string, $4);}
+
+remove_statement: TOKREMOVE id TOKIN id {$$ = create_remove_node($4->string, $2->string);}
 
 return_statement: TOKRETURN return_value {$$ = $2;}
 

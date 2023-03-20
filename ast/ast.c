@@ -12,6 +12,7 @@ void print_const(struct constant *left_const);
 
 void print_simple_condition(condition_union *simple_cond_union);
 
+map_entry *get_first_map_entry(map_entry *last_entry);
 
 query_node *create_query_node(void *statement, enum query_node_type query_node_type) {
     query_node *query_node = malloc(sizeof(struct query_node));
@@ -28,11 +29,26 @@ for_node *create_for_node(char *alias, char *table_name, subquery_node *subquery
     return created_for_node;
 }
 
-insert_node *create_insert_node(char *tablename, struct map_entry *map) {
+insert_node *create_insert_node(char *table_name, map_entry *map) {
     insert_node *ins_node = malloc(sizeof(struct insert_node));
-    ins_node->tablename = tablename;
-    ins_node->map = map;
+    ins_node->tablename = table_name;
+    ins_node->map = get_first_map_entry(map);
     return ins_node;
+}
+
+update_node *create_update_node(char *table_name, char *variable, map_entry *map) {
+    update_node *upd_node = malloc(sizeof(struct update_node));
+    upd_node->table_name = table_name;
+    upd_node->variable = variable;
+    upd_node->map = get_first_map_entry(map);;
+    return upd_node;
+}
+
+remove_node *create_remove_node(char *table_name, char *variable) {
+    remove_node *rem_node = malloc(sizeof(struct remove_node));
+    rem_node->table_name = table_name;
+    rem_node->variable = variable;
+    return rem_node;
 }
 
 subquery_node *create_subquery_node(void *statement, enum subquery_node_type subq_node_type) {
@@ -42,6 +58,13 @@ subquery_node *create_subquery_node(void *statement, enum subquery_node_type sub
     subquery_node->prev = NULL;
     subquery_node->next = NULL;
     return subquery_node;
+}
+
+terminal_statement_node *create_terminal_statement_node(void *term_statement, enum AST_NODE_TYPE term_node_type) {
+    terminal_statement_node *term_stmt_node = malloc(sizeof(struct terminal_statement_node));
+    term_stmt_node->terminal_stmt_type = term_node_type;
+    term_stmt_node->terminal_statement = term_statement;
+    return term_stmt_node;
 }
 
 subquery_node *push_back_subquery(subquery_node *previous, subquery_node *new) {
@@ -99,23 +122,6 @@ condition_union *create_simple_condition_union(condition_node *cond_node) {
     return simple_cond_union;
 }
 
-terminal_statement_node *create_terminal_statement_node(void *term_statement, enum AST_NODE_TYPE term_node_type) {
-    terminal_statement_node *term_stmt_node = malloc(sizeof(struct terminal_statement_node));
-    switch (term_node_type) {
-        case AST_NODE_RETURN:
-            term_stmt_node->terminal_stmt_type = AST_NODE_RETURN;
-            term_stmt_node->terminal_statement = term_statement;
-            break;
-        case AST_NODE_UPDATE:
-            //stub
-            break;
-        case AST_NODE_REMOVE:
-            //stub
-            break;
-    }
-    return term_stmt_node;
-}
-
 return_node *create_return_node(void *value, enum return_node_type ret_node_type) {
     return_node *ret_node = malloc(sizeof(struct return_node));
     ret_node->node_type = AST_NODE_RETURN;
@@ -125,10 +131,19 @@ return_node *create_return_node(void *value, enum return_node_type ret_node_type
             ret_node->constant = (struct constant *) value;
             break;
         case RETURN_MAP:
-            ret_node->map = (struct map_entry *) value;
+            ret_node->map = (map_entry *) value;
             break;
     }
     return ret_node;
+}
+
+map_entry *get_first_map_entry(map_entry *last_entry) {
+    map_entry *cur = NULL;
+    while (last_entry) {
+        cur = last_entry;
+        last_entry = last_entry->prev;
+    }
+    return cur;
 }
 
 void print_condition_union(condition_union *cond_union) {
