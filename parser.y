@@ -9,16 +9,19 @@ extern int yylex();
 
 %{
 #include <stdio.h>
-void yyerror(const char *str)
-{
-        fprintf(stderr,"ошибка: %s\n",str);
+void yyerror(struct query_node *root, const char *s){
+    printf("error:%s\n", s);
 }
 #ifdef YYDEBUG
   yydebug = 1;
 #endif
 %}
+
 /* Generate the parser description file. */
 %verbose
+%define parse.error verbose
+
+%parse-param { struct query_node *root }
 
 %union {
 int int_value;
@@ -32,6 +35,9 @@ struct constant *constant;
 struct condition_node *condition_node;
 struct condition_union *condition_union;
 struct return_node *return_node;
+struct terminal_statement_node *term_stmt;
+struct subquery_node* subquery_node;
+struct for_node *for_node;
 }
 
 %token <int_value> INT_TOKEN
@@ -42,47 +48,47 @@ struct return_node *return_node;
 %token <string> TOKFOR
 %token <string> TOKIN
 %token <string> QUOTE
-%token <string> SEMICOLON
+%token SEMICOLON
 %token <string> COMMA
 %token <string> COLON
 %token <string> OBRACE
 %token <string> EBRACE
 %token <string> TOKFILTER
-%token <string> TOKDOT
 %token <string> TOKRETURN
 %token <string> TOKEQUALS
 %token <string> TOKPERCENT
 %token <log_op> LOGOP
 %token <const_op> CONSTOP
+%token NEWLINE
 
-
-%type <string> query subqueries subquery
 %type <map> map_entry map_entries map
 %type <constant> value id constant
 %type <condition_node> condition
 %type <condition_union> condition_union conditions
 %type <return_node> return_value return_statement
+%type <term_stmt> terminal_statement
+%type <subquery_node> subquery subqueries
+%type <for_node> for_statement
 
 %%
-query: for_statement SEMICOLON {printf("done");}
+query: for_statement SEMICOLON{root = create_query_node((void *) $1, FOR_QUERY_STATEMENT); printf("done");}
 
-for_statement: TOKFOR ID TOKIN ID subqueries {printf("for_statement\n");}
+for_statement: TOKFOR ID TOKIN ID subqueries {$$ = create_for_node($2, $4, $5);}
 
-subqueries: subqueries subquery {;}
-           | subquery {;}
+subqueries: subqueries subquery {$$ = push_back_subquery($1, $2);}
+           | subquery {$$ = $1;}
 
-subquery: filter {;}
+subquery:
+        for_statement {$$ = create_subquery_node((void*) $1, FOR_STATEMENT); printf("subquery\n");}
         |
-        for_statement {printf("subquery\n");}
-        |
-        terminal_statement {printf("subquery\n");}
+        terminal_statement {$$ = create_subquery_node((void*) $1, TERMINAL_STATEMENT); printf("subquery\n");}
 
-terminal_statement: return_statement
+terminal_statement: return_statement {$$ = create_terminal_statement_node((void*) $1, AST_NODE_RETURN);}
 
 filter: TOKFILTER conditions {print_condition_union($2);}
 
 conditions:
-           condition SEMICOLON{$$ = create_simple_condition_union($1);printf("conditions\n");}
+           condition{$$ = create_simple_condition_union($1);printf("conditions\n");}
            |
            condition_union
            |

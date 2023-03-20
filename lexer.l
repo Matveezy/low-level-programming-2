@@ -4,9 +4,11 @@
 #include "parser.h"
 %}
 
-%option yylineno noyywrap debug
+%option yylineno noyywrap debug nounput
 
 %%
+[ \t]+                {}
+[\n\r]                  {}
 "true"                  {yylval.bool_value = true; return TOKBOOL;}
 "false"                 {yylval.bool_value = false; return TOKBOOL;}
 "&&"                    {yylval.log_op = AND_OPERATION; return LOGOP;}
@@ -21,7 +23,6 @@
 FOR                     return TOKFOR;
 FILTER                  return TOKFILTER;
 RETURN                  return TOKRETURN;
-\.                      return TOKDOT;
 IN                      return TOKIN;
 \"                      return QUOTE;
 \{                      return OBRACE;
@@ -34,5 +35,4 @@ IN                      return TOKIN;
 [a-zA-Z][a-zA-Z0-9.]*   {yylval.string = strdup(yytext); return ID; }
 -?[0-9]+                {yylval.int_value = atoi(yytext); return INT_TOKEN;}
 -?[0-9]+\.[0-9]+        {yylval.float_value = atof(yytext);  return FLOAT_TOKEN;}
-[\t\n]+
 %%

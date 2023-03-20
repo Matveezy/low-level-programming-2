@@ -12,6 +12,37 @@ void print_const(struct constant *left_const);
 
 void print_simple_condition(condition_union *simple_cond_union);
 
+
+query_node *create_query_node(void *statement, enum query_node_type query_node_type) {
+    query_node *query_node = malloc(sizeof(struct query_node));
+    query_node->query_node_type = query_node_type;
+    query_node->statement = statement;
+    return query_node;
+}
+
+for_node *create_for_node(char *alias, char *table_name, subquery_node *subquery_list) {
+    struct for_node *created_for_node = malloc(sizeof(struct for_node));
+    created_for_node->alias = alias;
+    created_for_node->table_name = table_name;
+    created_for_node->subquery_list = subquery_list;
+    return created_for_node;
+}
+
+subquery_node *create_subquery_node(void *statement, enum subquery_node_type subq_node_type) {
+    subquery_node *subquery_node = malloc(sizeof(struct subquery_node));
+    subquery_node->subquery_type = subq_node_type;
+    subquery_node->statement = statement;
+    subquery_node->prev = NULL;
+    subquery_node->next = NULL;
+    return subquery_node;
+}
+
+subquery_node *push_back_subquery(subquery_node *previous, subquery_node *new) {
+    previous->next = new;
+    new->prev = previous;
+    return new;
+}
+
 condition_node *
 create_condition_node(struct constant *left_value, struct constant *right_value, enum constant_operation const_op) {
     condition_node *condition_node = malloc(sizeof(struct condition_node));
@@ -59,6 +90,23 @@ condition_union *create_simple_condition_union(condition_node *cond_node) {
     simple_cond_union->left_side.left_condition_node = cond_node;
     simple_cond_union->left_condition_type = NODE;
     return simple_cond_union;
+}
+
+terminal_statement_node *create_terminal_statement_node(void *term_statement, enum AST_NODE_TYPE term_node_type) {
+    terminal_statement_node *term_stmt_node = malloc(sizeof(struct terminal_statement_node));
+    switch (term_node_type) {
+        case AST_NODE_RETURN:
+            term_stmt_node->terminal_stmt_type = AST_NODE_RETURN;
+            term_stmt_node->terminal_statement = term_statement;
+            break;
+        case AST_NODE_UPDATE:
+            //stub
+            break;
+        case AST_NODE_REMOVE:
+            //stub
+            break;
+    }
+    return term_stmt_node;
 }
 
 return_node *create_return_node(void *value, enum return_node_type ret_node_type) {
