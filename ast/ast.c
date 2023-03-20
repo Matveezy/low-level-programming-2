@@ -14,6 +14,8 @@ void print_simple_condition(condition_union *simple_cond_union);
 
 map_entry *get_first_map_entry(map_entry *last_entry);
 
+subquery_node *get_first_subquery(subquery_node *last_subquery);
+
 query_node *create_query_node(void *statement, enum query_node_type query_node_type) {
     query_node *query_node = malloc(sizeof(struct query_node));
     query_node->query_node_type = query_node_type;
@@ -25,7 +27,7 @@ for_node *create_for_node(char *alias, char *table_name, subquery_node *subquery
     struct for_node *created_for_node = malloc(sizeof(struct for_node));
     created_for_node->alias = alias;
     created_for_node->table_name = table_name;
-    created_for_node->subquery_list = subquery_list;
+    created_for_node->subquery_list = get_first_subquery(subquery_list);
     return created_for_node;
 }
 
@@ -51,6 +53,25 @@ remove_node *create_remove_node(char *table_name, char *variable) {
     return rem_node;
 }
 
+create_node *init_create_table_node(char *table_name, map_entry *columns) {
+    create_node *crt_table = malloc(sizeof(struct create_table_node));
+    crt_table->table_name = table_name;
+    crt_table->columns = get_first_map_entry(columns);
+    return crt_table;
+}
+
+drop_table_node *create_drop_table_node(char *table_name) {
+    drop_table_node *drop_node = malloc(sizeof(struct drop_table_node));
+    drop_node->table_name = table_name;
+    return drop_node;
+}
+
+filter_node *create_filter_node(condition_union *condition) {
+    filter_node *filter = malloc(sizeof(filter_node));
+    filter->condition = condition;
+    return filter;
+}
+
 subquery_node *create_subquery_node(void *statement, enum subquery_node_type subq_node_type) {
     subquery_node *subquery_node = malloc(sizeof(struct subquery_node));
     subquery_node->subquery_type = subq_node_type;
@@ -71,6 +92,15 @@ subquery_node *push_back_subquery(subquery_node *previous, subquery_node *new) {
     previous->next = new;
     new->prev = previous;
     return new;
+}
+
+subquery_node *get_first_subquery(subquery_node *last_subquery) {
+    subquery_node *cur = NULL;
+    while (last_subquery){
+        cur = last_subquery;
+        last_subquery = last_subquery->prev;
+    }
+    return cur;
 }
 
 condition_node *

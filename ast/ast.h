@@ -16,6 +16,9 @@ typedef struct for_node for_node;
 typedef struct insert_node insert_node;
 typedef struct remove_node remove_node;
 typedef struct update_node update_node;
+typedef struct create_table_node create_node;
+typedef struct drop_table_node drop_table_node;
+typedef struct filter_node filter_node;
 
 enum condition_type {
     NODE,
@@ -67,6 +70,19 @@ struct update_node {
     char *table_name;
     char *variable;
     map_entry *map;
+};
+
+struct create_table_node {
+    char *table_name;
+    map_entry *columns;
+};
+
+struct drop_table_node {
+    char *table_name;
+};
+
+struct filter_node {
+    condition_union *condition;
 };
 
 struct condition_node {
@@ -155,4 +171,9 @@ remove_node *create_remove_node(char *, char *);
 
 update_node *create_update_node(char *, char *, map_entry *);
 
+create_node *init_create_table_node(char *, map_entry *);
+
+drop_table_node *create_drop_table_node(char *);
+
+filter_node *create_filter_node(condition_union *);
 #endif //LOW_LEVEL_PROGRAMMING_2_AST_H

@@ -41,6 +41,9 @@ struct for_node *for_node;
 struct insert_node *insert_node;
 struct remove_node *remove_node;
 struct update_node *update_node;
+struct create_table_node *create_table_node;
+struct drop_table_node *drop_table_node;
+struct filter_node *filter_node;
 }
 
 %token <int_value> INT_TOKEN
@@ -67,6 +70,9 @@ struct update_node *update_node;
 %token TOKINTO
 %token TOKREMOVE
 %token TOKUPDATE
+%token TOKCREATE
+%token TOKDROP
+%token TOKTABLE
 
 
 %type <map> map_entry map_entries map
@@ -74,17 +80,24 @@ struct update_node *update_node;
 %type <condition_node> condition
 %type <condition_union> condition_union conditions
 %type <return_node> return_value return_statement
+%type <filter_node> filter
 %type <term_stmt> terminal_statement
 %type <subquery_node> subquery subqueries
 %type <for_node> for_statement
 %type <insert_node> insert_statement
 %type <remove_node> remove_statement
 %type <update_node> update_statement
+%type <create_table_node> create_table_statement
+%type <drop_table_node> drop_statement
 
 %%
 query: for_statement SEMICOLON {root = create_query_node((void *) $1, FOR_QUERY_STATEMENT); printf("done\n");}
        |
-       insert_statement {root = create_query_node((void *) $1, INSERT_QUERY_STATEMENT); printf("done\n");}
+       insert_statement SEMICOLON {root = create_query_node((void *) $1, INSERT_QUERY_STATEMENT); printf("done\n");}
+       |
+       create_table_statement SEMICOLON {root = create_query_node((void *) $1, CREATE_QUERY_STATEMENT); printf("done\n");}
+       |
+       drop_statement SEMICOLON {root = create_query_node((void *) $1, DROP_QUERY_STATEMENT); printf("done\n");}
 
 for_statement: TOKFOR ID TOKIN ID subqueries {$$ = create_for_node($2, $4, $5);}
 
@@ -95,6 +108,8 @@ subquery:
         for_statement {$$ = create_subquery_node((void*) $1, FOR_STATEMENT); printf("subquery\n");}
         |
         terminal_statement {$$ = create_subquery_node((void*) $1, TERMINAL_STATEMENT); printf("subquery\n");}
+        |
+        filter {$$ = create_subquery_node((void*) $1, FILTER_STATEMENT); printf("subquery\n");}
 
 terminal_statement: return_statement {$$ = create_terminal_statement_node((void*) $1, AST_NODE_RETURN);}
                     |
@@ -102,7 +117,7 @@ terminal_statement: return_statement {$$ = create_terminal_statement_node((void*
                     |
                     update_statement {$$ = create_terminal_statement_node((void*) $1, AST_NODE_UPDATE);}
 
-filter: TOKFILTER conditions {print_condition_union($2);}
+filter: TOKFILTER conditions {$$ = create_filter_node($2);}
 
 conditions:
            condition{$$ = create_simple_condition_union($1);printf("conditions\n");}
@@ -158,4 +173,8 @@ value:
        TOKBOOL {$$ = create_bool_constant($1);}
        |
        TOKSTRING {$$ = create_string_constant($1, false);}
+
+create_table_statement : TOKCREATE TOKTABLE id map {$$ = init_create_table_node($3->string, $4);};
+
+drop_statement : TOKDROP TOKTABLE id {$$ = create_drop_table_node($3->string);}
 %%
