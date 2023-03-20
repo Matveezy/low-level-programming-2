@@ -28,6 +28,13 @@ for_node *create_for_node(char *alias, char *table_name, subquery_node *subquery
     return created_for_node;
 }
 
+insert_node *create_insert_node(char *tablename, struct map_entry *map) {
+    insert_node *ins_node = malloc(sizeof(struct insert_node));
+    ins_node->tablename = tablename;
+    ins_node->map = map;
+    return ins_node;
+}
+
 subquery_node *create_subquery_node(void *statement, enum subquery_node_type subq_node_type) {
     subquery_node *subquery_node = malloc(sizeof(struct subquery_node));
     subquery_node->subquery_type = subq_node_type;

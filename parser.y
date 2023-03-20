@@ -38,6 +38,7 @@ struct return_node *return_node;
 struct terminal_statement_node *term_stmt;
 struct subquery_node* subquery_node;
 struct for_node *for_node;
+struct insert_node *insert_node;
 }
 
 %token <int_value> INT_TOKEN
@@ -59,7 +60,9 @@ struct for_node *for_node;
 %token <string> TOKPERCENT
 %token <log_op> LOGOP
 %token <const_op> CONSTOP
-%token NEWLINE
+%token TOKINSERT
+%token TOKINTO
+
 
 %type <map> map_entry map_entries map
 %type <constant> value id constant
@@ -69,9 +72,12 @@ struct for_node *for_node;
 %type <term_stmt> terminal_statement
 %type <subquery_node> subquery subqueries
 %type <for_node> for_statement
+%type <insert_node> insert_statement
 
 %%
-query: for_statement SEMICOLON{root = create_query_node((void *) $1, FOR_QUERY_STATEMENT); printf("done");}
+query: for_statement SEMICOLON {root = create_query_node((void *) $1, FOR_QUERY_STATEMENT); printf("done\n");}
+       |
+       insert_statement {root = create_query_node((void *) $1, INSERT_QUERY_STATEMENT); printf("done\n");}
 
 for_statement: TOKFOR ID TOKIN ID subqueries {$$ = create_for_node($2, $4, $5);}
 
@@ -109,13 +115,15 @@ return_value: constant {$$ = create_return_node($1, RETURN_CONSTANT);}
               |
               map {$$ = create_return_node($1, RETURN_MAP);}
 
+insert_statement : TOKINSERT map TOKINTO id {$$ = create_insert_node($4->string, $2);}
+
 map:
     OBRACE map_entries EBRACE {$$ = $2;}
 
 map_entries:
         map_entry
         |
-        map_entry COMMA map_entries {$$ = push_back_to_map($3, $1);}
+        map_entry COMMA map_entries {$$ = push_back_to_map($1, $3);}
 
 map_entry:
           TOKSTRING COLON constant {$$ = create_map($1,$3);}

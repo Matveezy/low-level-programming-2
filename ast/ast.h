@@ -12,6 +12,7 @@ typedef struct terminal_statement_node terminal_statement_node;
 typedef struct subquery_node subquery_node;
 typedef struct query_node query_node;
 typedef struct for_node for_node;
+typedef struct insert_node insert_node;
 
 enum condition_type {
     NODE,
@@ -93,6 +94,10 @@ struct terminal_statement_node {
     void *terminal_statement;
 };
 
+struct insert_node {
+    char *tablename;
+    struct map_entry *map;
+};
 
 struct ast_node {
     enum AST_NODE_TYPE node_type;
@@ -129,5 +134,7 @@ subquery_node *push_back_subquery(subquery_node *, subquery_node *);
 query_node *create_query_node(void *, enum query_node_type);
 
 for_node *create_for_node(char *, char *, subquery_node *);
+
+insert_node *create_insert_node(char *, struct map_entry *);
 
 #endif //LOW_LEVEL_PROGRAMMING_2_AST_H

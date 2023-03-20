@@ -21,6 +21,8 @@
 "=="                    {yylval.const_op = EQUALS; return CONSTOP;}
 "!="                    {yylval.const_op = NEQUALS; return CONSTOP;}
 FOR                     return TOKFOR;
+INSERT                  return TOKINSERT;
+INTO                    return TOKINTO;
 FILTER                  return TOKFILTER;
 RETURN                  return TOKRETURN;
 IN                      return TOKIN;
