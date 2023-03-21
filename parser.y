@@ -91,13 +91,13 @@ struct filter_node *filter_node;
 %type <drop_table_node> drop_statement
 
 %%
-query: for_statement SEMICOLON {root = create_query_node((void *) $1, FOR_QUERY_STATEMENT); printf("done\n");}
+query: for_statement SEMICOLON {root = create_query_node((void *) $1, FOR_QUERY_STATEMENT); print_ast(root, 0);}
        |
-       insert_statement SEMICOLON {root = create_query_node((void *) $1, INSERT_QUERY_STATEMENT); printf("done\n");}
+       insert_statement SEMICOLON {root = create_query_node((void *) $1, INSERT_QUERY_STATEMENT); print_ast(root, 0); }
        |
-       create_table_statement SEMICOLON {root = create_query_node((void *) $1, CREATE_QUERY_STATEMENT); printf("done\n");}
+       create_table_statement SEMICOLON {root = create_query_node((void *) $1, CREATE_QUERY_STATEMENT); print_ast(root, 0);}
        |
-       drop_statement SEMICOLON {root = create_query_node((void *) $1, DROP_QUERY_STATEMENT); printf("done\n");}
+       drop_statement SEMICOLON {root = create_query_node((void *) $1, DROP_QUERY_STATEMENT); print_ast(root, 0); }
 
 for_statement: TOKFOR ID TOKIN ID subqueries {$$ = create_for_node($2, $4, $5);}
 
@@ -153,7 +153,7 @@ map:
 map_entries:
         map_entry
         |
-        map_entry COMMA map_entries {$$ = push_back_to_map($1, $3);}
+        map_entries COMMA map_entry {$$ = push_back_to_map($1, $3);}
 
 map_entry:
           TOKSTRING COLON constant {$$ = create_map($1,$3);}

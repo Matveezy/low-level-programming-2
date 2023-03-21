@@ -151,7 +151,7 @@ condition_union *create_condition_union(void *, void *, enum condition_type,
 
 condition_union *create_simple_condition_union(condition_node *);
 
-void print_condition_union(condition_union *);
+void print_condition_union(condition_union *, int);
 
 return_node *create_return_node(void *, enum return_node_type);
 
@@ -176,4 +176,6 @@ create_node *init_create_table_node(char *, map_entry *);
 drop_table_node *create_drop_table_node(char *);
 
 filter_node *create_filter_node(condition_union *);
+
+void print_ast(query_node *, int);
 #endif //LOW_LEVEL_PROGRAMMING_2_AST_H
