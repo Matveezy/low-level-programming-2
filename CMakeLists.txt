@@ -43,7 +43,7 @@ set(CMAKE_C_STANDARD 99)
 add_executable(low_level_programming_2
         "${SRC_DIR}/main.c"
         "${LEXER_OUT}" "${PARSER_OUT}"
-        constant.c map_entry.c ast.c
+        constant/constant.c struct/map_entry.c ast/ast.c
         cmake-build-debug)
 
 #target_compile_options(low_level_programming_2 PRIVATE "--debug")
